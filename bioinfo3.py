@@ -158,3 +158,17 @@ def output_LA_w(backtrack, w, i, j):
         return output_LA_w(backtrack, w, i, j-1) + w[j-1]
     elif backtrack[i][j] == "diag":
         return output_LA_w(backtrack, w, i-1, j-1) + w[j-1]
+
+def editds(v,w):
+    s = np.zeros([len(v)+1, len(w)+1])
+    for i in range(len(v)+1):
+        s[i,0] = i
+    for j in range(len(w)+1):
+        s[0,j] = j
+    for i in range(1,len(v)+1):
+        for j in range(1, len(w)+1):
+            delt={True:0, False:1}
+            s[i][j] = min(s[i-1][j] + 1, 
+                          s[i][j-1] + 1, 
+                          s[i-1][j-1] + delt[v[i-1] == w[j-1]])
+    return s[-1,-1]
