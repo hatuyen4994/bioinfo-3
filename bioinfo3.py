@@ -52,3 +52,54 @@ def output_lcs(backtrack, v, i, j):
         return output_lcs(backtrack, v, i, j-1)
     elif backtrack[i][j] == "diag":
         return output_lcs(backtrack, v, i-1, j-1) + v[i-1]
+
+
+def global_alignment_backtrack(v,w,matrix):
+    s = np.zeros([len(v)+1, len(w)+1])
+    for i in range(len(v)+1):
+        s[i,0] = -5 * i
+    for j in range(len(w)+1):
+        s[0,j] = -5 * j    
+    backtrack = np.zeros([len(v)+1, len(w)+1])
+    backtrack = [list(i) for i in backtrack]
+    for i in range(1,len(v)+1):
+        for j in range(1, len(w)+1):
+            score = matrix[v[i-1]][w[j-1]]
+            s[i][j] = max(s[i-1][j] - 5, 
+                          s[i][j-1] - 5, 
+                          s[i-1][j-1] + score)
+            if s[i][j] == s[i-1][j] - 5:
+                backtrack[i][j] = "down"
+            elif s[i][j] == s[i][j-1] - 5:
+                backtrack[i][j] = "right"
+            elif s[i][j] == s[i-1][j-1] + score:
+                backtrack[i][j] = "diag"
+    return backtrack,s
+
+def output_ga_v(backtrack, v, i, j):
+    if i == 0 and j == 0:
+        return ""
+    elif i == 1 and j == 0:
+        return v[i-1]
+    elif i == 0 and j == 1:
+        return "-"
+    if backtrack[i][j] == "down":
+        return output_ga_v(backtrack, v, i-1, j) + v[i-1]
+    elif backtrack[i][j] == "right":
+        return output_ga_v(backtrack, v, i, j-1) + "-"
+    elif backtrack[i][j] == "diag":
+        return output_ga_v(backtrack, v, i-1, j-1) + v[i-1]
+    
+def output_ga_w(backtrack, w, i, j):
+    if i == 0 and j == 0:
+        return ""
+    elif i == 1 and j == 0:
+        return "-"
+    elif i == 0 and j == 1:
+        return w[j-1]
+    if backtrack[i][j] == "down":
+        return output_ga_w(backtrack, w, i-1, j) + "-"
+    elif backtrack[i][j] == "right":
+        return output_ga_w(backtrack, w, i, j-1) + w[j-1]
+    elif backtrack[i][j] == "diag":
+        return output_ga_w(backtrack, w, i-1, j-1) + w[j-1]
