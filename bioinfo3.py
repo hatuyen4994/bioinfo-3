@@ -1,6 +1,6 @@
 import numpy as np
 
-
+#######Week1##########
 def DP_change(money, coins):
     min_num_coins = {}
     min_num_coins[0] = 0
@@ -53,6 +53,7 @@ def output_lcs(backtrack, v, i, j):
     elif backtrack[i][j] == "diag":
         return output_lcs(backtrack, v, i-1, j-1) + v[i-1]
 
+#######Week2########
 
 def global_alignment_backtrack(v,w,score_matrix):
     s = np.zeros([len(v)+1, len(w)+1])
