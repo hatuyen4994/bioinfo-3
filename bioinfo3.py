@@ -385,14 +385,74 @@ def to_sink_2(v,w,score_matrix):
     return s0[::-1],s1[::-1]
 
 
-def middle_edge(v,w,score_matrix):
+def middle_edge(v,w,score_matrix, top = None, bottom = None, left = None, right = None):
+    print_max_length = False
+    if bottom == None:
+        top,left = 0,0
+        bottom = len(v)
+        right = len(w)
+    if  bottom == len(v) and right == len(w):
+        print_max_length = True
+    v = v[top:bottom]
+    w = w[left:right]
     source1, source2 = from_source_2(v,w,score_matrix)
     sink1,sink2 = to_sink_2(v,w,score_matrix)
     j_column = source1 + sink2
     j_plus_column = source2 + sink1
     middle = len(w) // 2
-    middle_nodes = np_index(j_column == j_column.max())
-    
-    start = (middle_nodes[-1],middle)
-    end = (j_plus_column.argmax(), middle+1)
+    middle_nodes_start = np_index(j_column == j_column.max())
+    middle_nodes_end = np_index(j_plus_column == j_plus_column.max())
+    start = (middle_nodes_start[-1] + top,middle + left)
+    end = (middle_nodes_end[-1] + top, middle+1 + left)
+    if print_max_length:
+        print("MAX LENGTH",j_column.max())
     return start,end
+
+
+def direction(edge):
+    start = edge[0]
+    end = edge[1]
+    if end[0] - start[0] == 0:
+        return "H"
+    else:
+        return "D"
+
+def linear_space_alignment(v,w,top,bottom,left,right):
+    if left == right:
+        return ["V" for i in range(top+1,bottom+1)] 
+    if top == bottom:
+        return ["H" for i in range(left+1,right+1)]
+    middle = (left+right)//2
+    try:
+        mid_edge = middle_edge(v,w,blosum62, top, bottom, left, right)
+    except:
+        print("input of mid_edge", top,bottom,left,right)
+    mid_node = mid_edge[0][0]
+    top_left = linear_space_alignment(v,w,top,mid_node,left,middle)
+    mid_edge = direction(mid_edge)
+    middle += 1
+    if mid_edge == "D":
+        mid_node +=1
+    bottom_right = linear_space_alignment(v,w,mid_node,bottom,middle,right)
+    return top_left + [mid_edge] + bottom_right
+
+def output_aligned_sequence(v,w,alignment):
+    v_i = 0
+    w_i = 0
+    v_aligned = ""
+    w_aligned = ""
+    for direction in alignment:
+        if direction == "V":
+            v_aligned += v[v_i]
+            v_i +=1
+            w_aligned += "-"
+        elif direction == "D":
+            v_aligned += v[v_i]
+            v_i +=1
+            w_aligned += w[w_i]
+            w_i +=1
+        elif direction == "H":
+            v_aligned += "-"
+            w_aligned += w[w_i]
+            w_i += 1
+    return v_aligned, w_aligned
