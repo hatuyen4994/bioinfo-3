@@ -456,3 +456,59 @@ def output_aligned_sequence(v,w,alignment):
             w_aligned += w[w_i]
             w_i += 1
     return v_aligned, w_aligned
+
+
+    ##########WEEEK 4#########
+
+def parse_permutation(P):
+    #convert permutation from string to int
+    P = P.strip()
+    P = P.split(" ")
+    P_int = [int(pk) for pk in P]
+    return P_int
+
+def k_sorting_reversal(P,k):
+    #Make the k position right in P
+    if k != abs(P[k-1]):
+        for i in range(k-1,len(P)):
+            if k == abs(P[i]):
+                rev = P[k-1:i+1][::-1]
+                P[k-1:i+1] = [pk*(-1) for pk in rev]
+        return P
+    if P[k-1] < 0:
+        P[k-1] = P[k-1]*(-1)
+        return P
+    
+def greedy_sorting(P):
+    #Greedy sorting the whole permutation
+    P = P[:]
+    reversal_distance = 0
+    P_sequence = []
+    for k in range(1, len(P)+1):
+        if abs(P[k-1]) != k:
+            P = k_sorting_reversal(P,k)
+            P_sequence.append(P[:])
+            reversal_distance +=1
+        if P[k-1] != k:
+            P = k_sorting_reversal(P,k)
+            P_sequence.append(P[:])
+            reversal_distance +=1
+    return reversal_distance,P_sequence
+
+
+def breakpoints_number(P):
+    #Calculate the breakpoint numbers
+    #If the first and the last permutation aren't in placed. They will be counted as break points
+    bp_n = 0
+    #The first
+    if P[0] != 1:
+        bp_n += 1
+    #The last
+    if P[-1] != len(P):
+        bp_n += 1
+    #All the between
+    for k in range(0,len(P)-1):
+        if P[k+1] - P[k] != 1:
+            bp_n += 1
+    return bp_n
+        
