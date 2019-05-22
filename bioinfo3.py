@@ -463,9 +463,21 @@ def output_aligned_sequence(v,w,alignment):
 def parse_permutation(P):
     #convert permutation from string to int
     P = P.strip()
-    P = P.split(" ")
-    P_int = [int(pk) for pk in P]
-    return P_int
+    if ")(" in P:
+        P = P[1:-1].split(")(")
+        P = " ".join(P)
+        P = P.split(" ")
+        P_int = [int(pk) for pk in P]
+        return P_int
+    elif ")" in P:
+        P = P[1:-1].split(" ")
+        P_int = [int(pk) for pk in P]
+        return P_int
+    else:
+        P = P.split(" ")
+        P_int = [int(pk) for pk in P]
+        return P_int
+        
 
 def k_sorting_reversal(P,k):
     #Make the k position right in P
@@ -512,3 +524,99 @@ def breakpoints_number(P):
             bp_n += 1
     return bp_n
         
+
+def print_P(P):
+    string = ' '.join(('+' if i > 0 else '') + str(i) for i in P)
+    print(string)
+    return None
+
+
+####WEEEK 5 #######
+
+def chromosome_to_cycle(chromosome):
+    #chromosome, permutation and genome sometime used interchangebally
+    # input has format of [-1,2,3]
+    nodes = []
+    for j in range(0,len(chromosome)):
+        i = chromosome[j]
+        if i > 0:
+            nodes.append(2*i - 1)
+            nodes.append(2*i)
+        else:
+            nodes.append(-2*i)
+            nodes.append(-2*i - 1)
+    return nodes
+
+
+def cycle_to_chromosome(nodes):
+    #input has format of [1, 2, 4, 3, 6, 5, 7, 8]
+    chromosome = []
+    for j in range(0, int(len(nodes)/2)):
+        if nodes[2*j] < nodes[2*j+1]:
+            chromosome.append(int(nodes[2*j+1]/2))
+        else:
+            chromosome.append(int(-nodes[2*j]/2))
+    return chromosome
+
+
+def color_edges(P):
+    #input has format of [[1, 2, 4, 3, 6, 5, 7, 8]]
+    edges = []
+    for chromosome in P:
+        nodes = chromosome_to_cycle(chromosome)
+        for j in range(len(chromosome)):
+            if j != len(chromosome)-1:
+                edges.append((nodes[2*j+1], nodes[2*j+2]))
+            else:
+                edges.append((nodes[2*j+1], nodes[0]))
+    return edges
+
+def to_tuple(string):
+    string = string.split(", ")
+    return int(string[0]), int(string[1])
+
+def parse_edges(edges):
+    #input has format of "(2, 4), (3, 6), (5, 1)"
+    edges = edges.strip()
+    edges = edges[1:-1].split("), (")
+    edges_tuple = [to_tuple(i)for i in edges]
+    return edges_tuple
+
+def find_cycle_from_gg(gg):
+    #input has format of [(2, 4), (3, 6), (5, 1)]
+    cycle = []
+    result = []
+    for edge in gg:
+        if edge[0] < edge[1]:
+            cycle.append(edge[0])
+            cycle.append(edge[1])
+        else:
+            cycle.append(edge[0])
+            cycle.append(edge[1])
+            result.append(cycle)
+            cycle = []
+    return result
+
+def graph_to_genome(gg):
+    #genome graph is the same as color edges 
+    #genome is the same as permutation
+    #input has format of [(2, 4), (3, 6), (5, 1)] or "(2, 4), (3, 6), (5, 1)"
+    P = []
+    if type(gg) == str:
+        gg = parse_edges(gg)
+    gg = find_cycle_from_gg(gg)
+    
+    for cycle in gg:
+        nodes = [cycle[-1]] + cycle[:-1]
+        chromosome = cycle_to_chromosome(nodes)
+        P.append(chromosome)
+    return P
+
+
+def print_genome(genome):
+    #Input has format of [[1, -2, -3], [-4, 5, -6]]
+    for gene in genome:
+        print("(",end="")
+        string = " ".join(("+" if i > 0 else "") + str(i) for i in gene )
+        print(string,end=")")
+    return None
