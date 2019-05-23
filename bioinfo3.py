@@ -585,18 +585,25 @@ def parse_edges(edges):
 
 def find_cycle_from_gg(gg):
     #input has format of [(2, 4), (3, 6), (5, 1)]
-    cycle = []
-    result = []
-    for edge in gg:
-        if edge[0] < edge[1]:
-            cycle.append(edge[0])
-            cycle.append(edge[1])
+    cycles = []
+    gg_copy = copy.deepcopy(gg)
+    while gg_copy != []:
+        gg_copy = copy.deepcopy(gg)
+        start_edge = gg_copy[0]
+        start_node = min(start_edge)
+        cycle = []
+        if start_node % 2 == 0:
+            end_node = start_node - 1
         else:
-            cycle.append(edge[0])
-            cycle.append(edge[1])
-            result.append(cycle)
-            cycle = []
-    return result
+            end_node = start_node + 1
+        for edge in gg:
+            cycle.append(edge)
+            gg_copy.remove(edge)
+            if end_node in edge:
+                gg = gg_copy
+                break
+        cycles.append(cycle)
+    return cycles
 
 def graph_to_genome(gg):
     #genome graph is the same as color edges 
@@ -605,10 +612,16 @@ def graph_to_genome(gg):
     P = []
     if type(gg) == str:
         gg = parse_edges(gg)
-    gg = find_cycle_from_gg(gg)
-    
-    for cycle in gg:
-        nodes = [cycle[-1]] + cycle[:-1]
+    cycles = find_cycle_from_gg(gg)
+    for cycle in cycles:
+        nodes = []
+        for edge in cycle:
+            nodes += [edge[0]]
+            nodes += [edge[1]]
+        argmin = nodes.index(min(nodes))
+        nodes = nodes[argmin:] + nodes[:argmin]
+        if nodes[-1] == nodes[0] + 1:
+            nodes = [nodes[-1]] + nodes[:-1]
         chromosome = cycle_to_chromosome(nodes)
         P.append(chromosome)
     return P
