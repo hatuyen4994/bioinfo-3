@@ -466,18 +466,20 @@ def parse_permutation(P):
     P = P.strip()
     if ")(" in P:
         P = P[1:-1].split(")(")
-        P = " ".join(P)
-        P = P.split(" ")
-        P_int = [int(pk) for pk in P]
+        P_int = []
+        for chromosome in P:
+            chromosome = chromosome.split(" ")
+            chromosome_int = [int(block) for block in chromosome]
+            P_int.append(chromosome_int)
         return P_int
     elif ")" in P:
         P = P[1:-1].split(" ")
         P_int = [int(pk) for pk in P]
-        return P_int
+        return [P_int]
     else:
         P = P.split(" ")
         P_int = [int(pk) for pk in P]
-        return P_int
+        return [P_int]
         
 
 def k_sorting_reversal(P,k):
