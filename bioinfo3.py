@@ -1,4 +1,5 @@
 import numpy as np
+import copy
 
 #######Week1##########
 def DP_change(money, coins):
@@ -532,7 +533,7 @@ def print_P(P):
 
 
 ####WEEEK 5 #######
-
+##CHARGING STATION 1
 def chromosome_to_cycle(chromosome):
     #chromosome, permutation and genome sometime used interchangebally
     # input has format of [-1,2,3]
@@ -620,3 +621,52 @@ def print_genome(genome):
         string = " ".join(("+" if i > 0 else "") + str(i) for i in gene )
         print(string,end=")")
     return None
+
+
+
+
+##2 BREAKS DISTANCE PROBLEM
+
+def find_common_cyle(P_ce, Q_ce):
+    #Input has format of color edges or genome graph [(2, 3), (4, 5), (6, 7), (8, 9), (10, 11), (12, 1)]
+    P_ce = copy.deepcopy(P_ce)
+    Q_ce = copy.deepcopy(Q_ce)
+    P_ce_copy = np.array(copy.deepcopy(P_ce))
+    Q_ce_copy = np.array(copy.deepcopy(Q_ce))
+    cycles = []
+    while P_ce != [] and Q_ce !=[]:
+        start_edge = P_ce[0]
+        start_node = start_edge[0]
+        end_node = start_edge[1]
+        P_ce.remove(start_edge)
+        cycle = [tuple(start_edge)]
+        pointer = "P"
+        while end_node != start_node and (P_ce != [] or Q_ce !=[]):
+            if pointer == "P":
+                condition = (Q_ce_copy==end_node).any(axis=1)
+                edge = Q_ce_copy[condition][0]
+                cycle.append(tuple(edge))
+                end_node = int(edge[edge != end_node])
+                pointer = "Q"
+                Q_ce.remove(tuple(edge))
+            else:
+                condition = (P_ce_copy==end_node).any(axis=1)
+                edge = P_ce_copy[condition][0]
+                cycle.append(tuple(edge))
+                end_node = int(edge[edge != end_node])
+                pointer = "P"
+                P_ce.remove(tuple(edge))
+        cycles.append(cycle)
+    return cycles
+
+
+def distance_2breaks(P,Q):
+    #Input are permutation or genome of format [[1, -3, -6, -5], [2, -4]]
+    P_ce = color_edges(P)
+    Q_ce = color_edges(Q)
+    cycles = find_common_cyle(P_ce, Q_ce)
+    blocks = 0
+    for i in Q:
+        blocks += len(i)
+    distance_2breaks = blocks - len(cycles)
+    return distance_2breaks
