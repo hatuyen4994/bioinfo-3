@@ -585,25 +585,44 @@ def parse_edges(edges):
     edges_tuple = [to_tuple(i)for i in edges]
     return edges_tuple
 
-def find_cycle_from_gg(gg):
+
+def reorientate_edge(edge,head):
+    if edge[0] == head:
+        return edge
+    else:
+        return edge[::-1]
+
+
+def find_cycle_reoriented(gg):
     #input has format of [(2, 4), (3, 6), (5, 1)]
     cycles = []
     gg_copy = copy.deepcopy(gg)
     while gg_copy != []:
-        gg_copy = copy.deepcopy(gg)
-        start_edge = gg_copy[0]
-        start_node = min(start_edge)
-        cycle = []
-        if start_node % 2 == 0:
-            end_node = start_node - 1
+        edge = gg_copy.pop(0)
+        head_node = edge[0]
+        tail_node = edge[1]
+        cycle = [edge]
+        if head_node % 2 == 0:
+            end_node = head_node - 1
         else:
-            end_node = start_node + 1
-        for edge in gg:
-            cycle.append(edge)
-            gg_copy.remove(edge)
-            if end_node in edge:
-                gg = gg_copy
-                break
+            end_node = head_node + 1
+        cycle_end = False
+        while not cycle_end:
+            next_node = tail_node - 1 if tail_node % 2 == 0 else tail_node + 1
+            for edge in gg_copy:
+                if next_node in edge:
+                    new_edge = reorientate_edge(edge,next_node)
+                    cycle.append(new_edge)
+                    gg_copy.remove(edge)
+                    tail_node = new_edge[1]
+                    next_node = tail_node - 1 if tail_node % 2 == 0 else tail_node + 1
+                    if end_node in new_edge:
+                        cycle_end = True
+                        break
+                    else:
+                        break
+                else:
+                    pass
         cycles.append(cycle)
     return cycles
 
@@ -614,7 +633,7 @@ def graph_to_genome(gg):
     P = []
     if type(gg) == str:
         gg = parse_edges(gg)
-    cycles = find_cycle_from_gg(gg)
+    cycles = find_cycle_reoriented(gg)
     for cycle in cycles:
         nodes = []
         for edge in cycle:
@@ -685,3 +704,21 @@ def distance_2breaks(P,Q):
         blocks += len(i)
     distance_2breaks = blocks - len(cycles)
     return distance_2breaks
+
+
+###CHARGING STATION 2 
+def two_breaks_on_gg(gg, i1, i2, i3, i4):
+    gg = copy.deepcopy(gg)
+    if type(gg) == str:
+        gg = parse_edges(gg)
+    try:
+        gg.remove((i1,i2))
+    except:
+        gg.remove((i2,i1))
+    try:
+        gg.remove((i3,i4))
+    except:
+        gg.remove((i4,i3))
+    gg.append((i1,i3))
+    gg.append((i2,i4))
+    return gg
