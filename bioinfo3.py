@@ -602,11 +602,8 @@ def find_cycle_reoriented(gg):
         head_node = edge[0]
         tail_node = edge[1]
         cycle = [edge]
-        if head_node % 2 == 0:
-            end_node = head_node - 1
-        else:
-            end_node = head_node + 1
-        cycle_end = False
+        end_node = head_node - 1 if head_node % 2 ==0 else head_node + 1
+        cycle_end = False if end_node not in edge else True
         while not cycle_end:
             next_node = tail_node - 1 if tail_node % 2 == 0 else tail_node + 1
             for edge in gg_copy:
@@ -722,3 +719,50 @@ def two_breaks_on_gg(gg, i1, i2, i3, i4):
     gg.append((i1,i3))
     gg.append((i2,i4))
     return gg
+
+
+###2 BREAKS SORTING PROBLEM
+def is_trivialcycle(cycle):
+    if len(cycle) > 2:
+        return False
+    if cycle[0] == cycle[1] or cycle[0] == cycle[1][::-1]:
+        return True
+    else:
+        return False
+
+
+def two_breaks_sorting(P,Q):
+    P = parse_permutation(P) if type(P) == str else P
+    Q = parse_permutation(Q) if type(Q) == str else Q
+    print_genome(P)
+    print()
+    red_edges = color_edges(P)
+    blue_edges = color_edges(Q)
+    common_cycles = find_common_cyle(red_edges,blue_edges)
+    all_trivial = all([is_trivialcycle(cycle) for cycle in common_cycles])
+    while not all_trivial :
+        all_trivial = is_trivialcycle(common_cycles[0])
+        for cycle in common_cycles:
+            if is_trivialcycle(cycle) == True:
+                all_trivial = all((all_trivial,True))
+            else:
+                all_trivial = False
+                blue = cycle[0] if cycle[0] in blue_edges else cycle[1]
+                idx = cycle.index(blue)
+                red1 = cycle[idx-1]
+                red2 = cycle[idx+1]
+                i1 = blue[0]
+                i3 = blue[1]
+                if i1 in red1:
+                    i2 = [i for i in red1 if i != i1][0]
+                    i4 = [i for i in red2 if i != i3][0]
+                else:
+                    i2 = [i for i in red2 if i != i1][0]
+                    i4 = [i for i in red1 if i != i3][0]
+                red_edges = two_breaks_on_gg(red_edges,i1,i2,i3,i4)
+                new_P = graph_to_genome(red_edges)
+                print_genome(new_P)
+                print()
+                common_cycles = find_common_cyle(red_edges,blue_edges)
+                break
+    return None
